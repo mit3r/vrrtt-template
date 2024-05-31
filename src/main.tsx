@@ -1,15 +1,23 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom'
-import App from './App.tsx'
-import './index.css'
+import React from "react";
+import ReactDOM from "react-dom/client";
 
-const router = createBrowserRouter(createRoutesFromElements(
-    <Route path="/" element={<App />} ></Route>
-))
+import GameContextProvider from "../utils/MultiplayerContext.tsx";
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>,
-)
+import { insertCoin, InitOptions } from "playroomkit";
+
+import "./index.css";
+import App from "../pages/App";
+
+const settings: InitOptions = {
+  skipLobby: true,
+};
+
+await insertCoin(settings, () => {
+  ReactDOM.createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <GameContextProvider>
+        <App />
+      </GameContextProvider>
+    </React.StrictMode>
+  );
+});
