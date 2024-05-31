@@ -1,17 +1,18 @@
 import { createContext, PropsWithChildren, useEffect, useState } from "react";
 
-import {
-  setState as setStatePR,
-  waitForState as waitForStatePR,
-} from "playroomkit";
+import { RPC } from "playroomkit";
 
 import { initMultiplayerState, TMultiplayerState } from "./States.ts";
 
+type TSetMultiplayerState = <K extends keyof TMultiplayerState>(
+  key: K,
+  value:
+    | TMultiplayerState[K]
+    | ((prev: TMultiplayerState[K]) => TMultiplayerState[K])
+) => void;
+
 type TMultiplayerContext = TMultiplayerState & {
-  set: <K extends keyof TMultiplayerState>(
-    key: K,
-    value: TMultiplayerState[K]
-  ) => void;
+  set: TSetMultiplayerState;
 };
 
 export const MultiplayerContext = createContext({} as TMultiplayerContext);
@@ -22,28 +23,20 @@ export default function MultiplayerContextProvider({
   const [indirectState, setIndirect] = useState(initMultiplayerState);
 
   // Type-safe setState - playroomkit
-  function setState<K extends keyof TMultiplayerState>(
-    key: K,
-    value: TMultiplayerState[K]
-  ) {
-    // console.log("Setting", key, value);
-    setStatePR(key, value, true);
-  }
+  const setState: TSetMultiplayerState = (key, setValue) => {
+    const value =
+      typeof setValue === "function" ? setValue(indirectState[key]) : setValue;
 
-  // Listen for changes to the multiplayer state
-  // It must be re-registered every time the indirectState changes
-  // Cause it waits only for one update
+    RPC.call("setMultiplayerState", { key, value }, 0, () =>
+      setIndirect((prev) => ({ ...prev, [key]: value }))
+    );
+  };
+
   useEffect(() => {
-    Object.entries(initMultiplayerState).forEach(([key, value]) => {
-      setStatePR(key, value, true);
-      // console.log("Waiting for", key, value);
-
-      waitForStatePR(key, (value) => {
-        console.log("Received", key, value);
-        setIndirect((prev) => ({ ...prev, [key]: value }));
-      });
+    RPC.register("setMultiplayerState", async ({ key, value }) => {
+      setIndirect((prev) => ({ ...prev, [key]: value }));
     });
-  }, [indirectState]);
+  }, []);
 
   return (
     <MultiplayerContext.Provider value={{ ...indirectState, set: setState }}>

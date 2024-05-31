@@ -4,7 +4,7 @@ export type { PlayerState } from "playroomkit"
 
 export const initMultiplayerState = {
     count: 0,
-    // test: "0",
+    test: "0",
 };
 
 export type TMultiplayerState = typeof initMultiplayerState;

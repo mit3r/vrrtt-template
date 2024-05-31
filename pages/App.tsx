@@ -1,22 +1,18 @@
-import { useContext } from "react";
-
-import { MultiplayerContext } from "../utils/MultiplayerContext";
+import { useMultiState } from "../utils/TestContext";
 
 export default function App() {
-  const { count, set } = useContext(MultiplayerContext);
-
-  // const [count, setCount] = useMultiplayerState("count", 0);
+  const { count, test, setMultiState } = useMultiState();
 
   const increment = () => {
-    set("count", count + 1);
-    // set("test", (parseInt(test) + 1).toString());
+    setMultiState("count", (count) => count + 1);
+    setMultiState("test", (parseInt(test) + 1).toString());
   };
 
   const decrement = () => {
     // console.log(count - 1);
     // set("count", 0);
-    set("count", count - 1);
-    // set("test", (parseInt(test) - 1).toString());
+    setMultiState("count", count - 1);
+    setMultiState("test", (parseInt(test) - 1).toString());
   };
 
   return (
@@ -37,7 +33,7 @@ export default function App() {
         Decrement
       </button>
 
-      {/* {test} */}
+      {test}
     </div>
   );
 }

@@ -1,12 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-import GameContextProvider from "../utils/MultiplayerContext.tsx";
+import "./index.css";
+import App from "../pages/App";
 
 import { insertCoin, InitOptions } from "playroomkit";
 
-import "./index.css";
-import App from "../pages/App";
+import {
+  MultiplayerContextProvider,
+  PlayerContextProvider,
+} from "../utils/TestContext";
 
 const settings: InitOptions = {
   skipLobby: true,
@@ -15,9 +18,11 @@ const settings: InitOptions = {
 await insertCoin(settings, () => {
   ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
-      <GameContextProvider>
-        <App />
-      </GameContextProvider>
+      <PlayerContextProvider>
+        <MultiplayerContextProvider>
+          <App />
+        </MultiplayerContextProvider>
+      </PlayerContextProvider>
     </React.StrictMode>
   );
 });
