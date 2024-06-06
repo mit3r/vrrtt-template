@@ -2,9 +2,14 @@ import { PlayerState } from "playroomkit";
 
 export type { PlayerState } from "playroomkit"
 
+export interface Question {
+    text: string,
+    answers: string[],
+    correct: number[],
+}
+
 export const initMultiplayerState = {
-    count: 0,
-    test: "0",
+    queue: [] as Question[],
 };
 
 export type TMultiplayerState = typeof initMultiplayerState;

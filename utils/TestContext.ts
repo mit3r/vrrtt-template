@@ -1,12 +1,26 @@
 import createPlayroomKitContext from "../PlayroomAdapter/index";
 
+export interface Question {
+  text: string,
+  answers: string[],
+  correct: number[],
+}
+
+// {
+//   text: "Czy to ma sens?",
+//   answers: ["Tak", "Nie", "Nie wiem", "Chuj mnie już strzela"],
+//   correct: [1] as number[]
+// }
+
 const multiplayerState = {
-  count: 0,
-  test: "0",
+  question: null as Question | null,
+
+  ingame: true,
 };
 
 const playerState = {
-  name: "Player",
+  score: 0 as number,
+  answered: false as boolean
 };
 
 const { 
@@ -16,5 +30,5 @@ const {
   PlayerContextProvider,
 } = createPlayroomKitContext(playerState, multiplayerState,);
 
-export { useMultiState, usePlayerState, MultiplayerContextProvider, PlayerContextProvider};
+export { MultiplayerContextProvider, PlayerContextProvider, useMultiState, usePlayerState };
 
