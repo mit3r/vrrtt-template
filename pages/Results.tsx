@@ -1,7 +1,6 @@
-import { usePlayersList, usePlayersState } from "playroomkit";
+import { usePlayersState } from "playroomkit";
 
 export default function Results() {
-  const players = usePlayersList(true);
   const scores = usePlayersState("score");
 
   return (
