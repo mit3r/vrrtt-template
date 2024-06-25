@@ -23,8 +23,7 @@ export default class PlayersEngine {
       if (this.players.length >= this.options.maxPlayers)
         throw new Error(Errors.MAX_PLAYERS_REACHED);
 
-      if (this.players.find((p) => p.name === name))
-        throw new Error(Errors.PLAYER_ALREADY_EXISTS);
+      if (this.players.find((p) => p.name === name)) throw new Error(Errors.PLAYER_ALREADY_EXISTS);
 
       return {
         name,
@@ -66,22 +65,49 @@ export default class PlayersEngine {
     }
   };
 
+  get = (name: string) => {
+    const player = this.players.find((player) => player.name === name);
+    if (!player) throw new Error(Errors.PLAYER_NOT_FOUND);
+
+    return player;
+  };
+
+  getAll = () => this.players;
+
   getOnline = () => this.players.filter((player) => player.online);
+
+  getAlive = () => this.players.filter((player) => player.alive);
 
   getCurrent = () => {
     if (this.pointer >= this.players.length || this.pointer < 0)
       throw new Error(Errors.CURRENT_PLAYER_FAULT);
 
-    return this.players[this.pointer];
+    const player = this.players[this.pointer];
+    if (player.hand.length != 0) throw new Error(Errors.CURRENT_PLAYER_FAULT);
+
+    return player;
+  };
+
+  getEffect = (name: string) => {
+    const player = this.get(name);
+    return player.rejected[0];
   };
 
   chooseNext = () => {
     if (this.players.length === 0) throw new Error(Errors.NO_PLAYERS);
 
-    this.pointer = (this.pointer + 1) % this.players.length;
-
-    do {
+    while (true) {
       this.pointer = (this.pointer + 1) % this.players.length;
-    } while (!this.getCurrent().online && this.options.autoPlay);
+      let player = this.getCurrent();
+
+      if (player.online && player.alive) break;
+      if (!player.online && this.options.autoPlay) break;
+    }
+  };
+
+  authorize = (name: string) => {
+    if (this.getCurrent().name !== name) throw new Error(Errors.NOT_PLAYER_TURN);
+
+    return true;
   };
 }
