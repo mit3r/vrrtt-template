@@ -1,7 +1,5 @@
-import { TCardHandlerUse } from "./types";
-import CardsEngine from "./CardsEngine";
-import PlayersEngine from "./PlayersEngine";
-
+import { LoveLetterEngine } from ".";
+import { CardsTypes } from "./Cards";
 // PLAYERS ENGINE
 export interface TPlayer {
   name: string;
@@ -9,18 +7,27 @@ export interface TPlayer {
   alive: boolean;
   online: boolean;
 
-  hand: string[];
-  known: { [name: string]: string[] };
-  rejected: (string | null)[];
+  hand: CardsTypes[];
+  known: { [name: string]: CardsTypes | null };
+  effect: CardsTypes | null;
+  rejected: CardsTypes[];
+
+  flattery_pointer: string | null;
+  joke_pointer: string | null;
+  protected: boolean;
+
+  level: number;
 
   points: number;
 }
 
-export interface TPlayersOptions {
+export interface TOptions {
   maxPlayers: number;
   minPlayers: number;
   queuing: "abc" | "cba" | "random" | "fifo" | "lifo";
   autoPlay: boolean;
+  round: number;
+  winner: string;
 }
 
 // STATE ENGINE
@@ -28,7 +35,9 @@ export interface TStateOptions {
   maxPoints: number;
 }
 
-export type TOtherPlayer = Omit<TPlayer, "hand" | "known">;
+export type TOtherPlayer = Omit<TPlayer, "hand" | "known"> & {
+  known: string | null;
+};
 
 export interface TPersonalState {
   you: TPlayer;
@@ -40,15 +49,7 @@ export interface TPersonalState {
 
 export type TState = Record<string, TPersonalState>;
 
-// CARDS ENGINE
-
-export type TCardHandler = (players: PlayersEngine, cards: CardsEngine) => Signal[];
-
-export type TCardHandlerUse = (
-  players: PlayersEngine,
-  cards: CardsEngine,
-  params: string[]
-) => Signal[];
+// Cards
 
 export interface TCard {
   level: number;
@@ -59,17 +60,24 @@ export interface TCard {
     inRejected: TCardHandler;
   }>;
 }
+export type TCardHandler = (this: LoveLetterEngine, performer: string) => Signal[];
+export type TCardHandlerUse = (
+  this: LoveLetterEngine,
+  performer: string,
+  params: string[]
+) => Signal[];
 
+// Signals
 export enum SignalType {
   PROTECT = "PROTECT",
   SHOW = "SHOW",
   REJECT = "REJECT",
   KILL = "KILL",
   SWAP = "SWAP",
-  CHANGE = "CHANGE",
   POINT = "POINT",
   LEVEL = "LEVEL",
   FLATTERY = "FLATTERY",
+  JOKE = "JOKE",
 }
 
 export interface Signal {

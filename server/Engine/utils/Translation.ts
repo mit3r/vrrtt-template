@@ -2,13 +2,12 @@ import { Errors } from "./Errors";
 
 export const pl = {
   [Errors.PLAYER_NOT_FOUND]: "Nie znaleziono gracza",
-  [Errors.PLAYER_ALREADY_EXISTS]: "Gracz już istnieje",
   [Errors.MAX_PLAYERS_REACHED]: "Osiągnięto maksymalną liczbę graczy",
   [Errors.INVALID_QUEUING_METHOD]: "Nieprawidłowa metoda kolejkowania",
   [Errors.CURRENT_PLAYER_FAULT]: "Błąd aktualnego gracza",
   [Errors.NO_PLAYERS]: "Brak graczy",
 
-  ["Princess"]: {
+  ["princess"]: {
     name: "Księżniczka",
     description:
       "Księżniczka jest jedyną kartą, która nie może być odrzucona. Jeśli zostanie odrzucona, gracz, który to zrobił, przegrywa grę.",

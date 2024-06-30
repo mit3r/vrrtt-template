@@ -1,17 +1,63 @@
-import CardsEngine from "./CardsEngine";
-import PlayersEngine from "./PlayersEngine";
-import StateEngine from "./StateEngine";
+import { LoveLetterBase } from "./base";
+import { CardsTypes } from "./Cards";
+import { Gameplay } from "./Gameplay";
+import { State } from "./State";
+import { TState } from "./types";
 
-export class LoveLetterEngine {
-  players = new PlayersEngine();
-  cards = new CardsEngine();
-  state = new StateEngine();
+export class LoveLetterEngine extends LoveLetterBase {
+  emit: (state: TState) => void = () => {};
 
-  private emit: () => void;
+  winner: string | null = null;
+  round = 0;
 
-  constructor(names: string[], emit: () => void) {
-    this.players.add(names);
+  constructor(names: string[], debug: boolean = false, stack: CardsTypes[] = []) {
+    super(names);
 
-    emit();
+    if (debug) this.stack = stack;
+
+    // each player gets a card
+    Gameplay.DealCards.bind(this)();
+
+    // first player
+    Gameplay.DealSecondCard.bind(this)(this.PlayerGetCurrent());
+
+    // emit current state
+    if (!debug) this.emit(State.get.bind(this)());
+  }
+
+  playTurn(who: string, hand: 0 | 1, params: string[]) {
+    // check if it's the player's turn
+    if (!this.PlayerAuthorize(who)) {
+      return;
+    }
+
+    // check if targets are protected
+    Gameplay.IsNotTargetProtected.bind(this)(params);
+    Gameplay.ClearProtection.bind(this)();
+
+    // play the turn
+    let currentPlayer = this.PlayerGetCurrent();
+    Gameplay.ProccesActionCard.bind(this)(hand, params);
+
+    // collect effects
+    Gameplay.ProccesSignals.bind(this)();
+
+    // reset protected
+
+    if (Gameplay.CheckWin.bind(this)()) {
+      this.emit(State.get.bind(this)());
+      return;
+    }
+
+    // change player
+    this.PlayerChooseNext();
+    currentPlayer = this.PlayerGetCurrent();
+
+    Gameplay.DealSecondCard.bind(this)(currentPlayer);
+    Gameplay.DropEffectCard.bind(this)(currentPlayer);
+    Gameplay.ResetKnown.bind(this)(currentPlayer);
+
+    // emit current state
+    this.emit(State.get.bind(this)());
   }
 }
