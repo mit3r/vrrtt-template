@@ -3,8 +3,8 @@ import { LoveLetterEngine } from "./Engine";
 
 import { Server } from "socket.io";
 import { TState } from "./Engine/types";
-import { State } from "./Engine/State";
-import { CardsTypes } from "./Engine/Cards";
+import { State } from "./Engine/Managers/State";
+import { Roles } from "./Engine/Managers/CardsUtils";
 
 // // const app = express();
 // // const port = 3000;
@@ -65,7 +65,7 @@ const game = new LoveLetterEngine(
   ["p1", "p2", "p3"],
   logState,
   true,
-  ["guard", "handmaid", "princess", "king"].reverse() as CardsTypes[]
+  ["guard", "handmaid", "princess", "king"].reverse() as Roles[]
 );
 
 logState(State.get.bind(game)());

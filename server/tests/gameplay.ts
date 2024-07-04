@@ -1,13 +1,12 @@
 import { deepEqual, strictEqual, throws } from "node:assert";
-import { LoveLetterEngine } from "../Engine";
+import { GameEngine } from "../Engine/GameEngine";
 
-import { it, describe } from "node:test";
-
-import { CardsTypes } from "../Engine/Cards";
+import { it, describe, after } from "node:test";
+import { TRole } from "../Engine/types/Cards";
 
 export function cardsTests() {
   describe("Guard", () => {
-    const stack: CardsTypes[] = [
+    const stack: TRole[] = [
       "guard",
       "handmaid",
       "priest",
@@ -15,17 +14,17 @@ export function cardsTests() {
       "guard",
       "guard",
       "guard",
-    ].reverse() as CardsTypes[];
-    let game = new LoveLetterEngine(["p1", "p2", "p3"], true, stack);
+    ].reverse() as TRole[];
+    let game = new GameEngine(["p1", "p2", "p3"], true, stack);
 
     it("p1 should have 2 guards", () => {
-      const hand = game.PlayerGetCurrent().hand;
+      const hand = game.players.current().hand;
       strictEqual(hand[0], "guard");
       strictEqual(hand[1], "guard");
     });
 
     it("should throw error on other player play", () => {
-      for (const player of game.PlayersGetAll().filter((p) => p.name !== "p1")) {
+      for (const player of game.players.getAll().filter((p) => p.name !== "p1")) {
         throws(() => game.playTurn(player.name, 0, ["p2", "2"]));
       }
     });
@@ -41,13 +40,13 @@ export function cardsTests() {
 
     it("Should be able to play and not eliminate", () => {
       game.playTurn("p1", 0, ["p2", "2"]);
-      strictEqual(game.PlayerGet("p2").alive, true);
+      strictEqual(game.players.get("p2").alive, true);
     });
 
     it("should not be able to kill handmaid", () => {
       game.playTurn("p2", 0, []); // using handmaid
-      strictEqual(game.PlayerGet("p2").effect, "handmaid");
-      strictEqual(game.PlayerGet("p2").protected, true);
+      strictEqual(game.players.get("p2").effect, "handmaid");
+      strictEqual(game.players.get("p2").protected, true);
       game.playTurn("p3", 0, ["p1"]);
 
       throws(() => game.playTurn("p1", 0, ["p2", "2"]));
@@ -59,29 +58,37 @@ export function cardsTests() {
   });
 
   describe("Priest", () => {
-    let game = new LoveLetterEngine(
+    let game = new GameEngine(
       ["p1", "p2", "p3"],
       true,
-      ["priest", "guard", "guard", "guard", "guard"].reverse() as CardsTypes[]
+      ["priest", "guard", "guard", "guard", "guard"].reverse() as TRole[]
     );
 
+    // 1 because cards are sorted in hand
+
     it("p1 should has priest in hand", () => {
-      strictEqual(game.PlayerGet("p1").hand[0], "priest");
+      strictEqual(game.players.get("p1").hand[1], "priest");
     });
 
     it("should requires target param", () => {
-      throws(() => game.playTurn("p1", 0, []));
-      throws(() => game.playTurn("p1", 0, ["2"]));
-      throws(() => game.playTurn("p1", 0, ["p4"]));
+      throws(() => game.playTurn("p1", 1, []));
+      throws(() => game.playTurn("p1", 1, ["2"]));
+      throws(() => game.playTurn("p1", 1, ["p4"]));
 
       // here comes error because cards was swapped because of playTurn
       // and priest is in the other hand
-      strictEqual(game.PlayerGet("p1").hand[0], "priest");
+      strictEqual(game.players.get("p1").hand[1], "priest");
     });
 
     it("should not be able to target themself", () => {
-      // strictEqual(game.PlayerGet("p1").hand[0], "priest");
-      throws(() => game.playTurn("p1", 0, ["p1"]));
+      strictEqual(game.players.get("p1").hand[1], "priest");
+      throws(() => game.playTurn("p1", 1, ["p1"]));
+    });
+
+    it("should be able to target other player", () => {
+      strictEqual(game.players.get("p1").hand[1], "priest");
+      game.playTurn("p1", 1, ["p2"]);
+      strictEqual(game.players.get("p1").known["p2"], "guard");
     });
   });
 }

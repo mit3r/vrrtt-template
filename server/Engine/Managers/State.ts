@@ -1,11 +1,12 @@
-import { LoveLetterEngine } from ".";
-import { TOtherPlayer, TPersonalState, TPlayer, TState } from "./types";
+import { GameEngine } from "../GameEngine";
+import { TOtherPlayer, TPersonalState, TState } from "../types/State";
+import { Player } from "./PlayerManager";
 
 export namespace State {
-  export function get(this: LoveLetterEngine): TState {
-    const players = this.PlayersGetAll();
+  export function get(this: GameEngine): TState {
+    const players = this.players.getAll();
 
-    return this.PlayersGetAll().reduce((acc, player) => {
+    return players.reduce((acc, player) => {
       acc[player.name] = getPersonal.bind(this)(
         player,
         players.filter((p) => p.name !== player.name)
@@ -15,7 +16,7 @@ export namespace State {
     }, {} as Record<string, TPersonalState>);
   }
 
-  function getPersonal(this: LoveLetterEngine, me: TPlayer, others: TPlayer[]): TPersonalState {
+  function getPersonal(this: GameEngine, me: Player, others: Player[]): TPersonalState {
     const player = me;
     const otherPlayers: TOtherPlayer[] = others.map((p) => ({
       name: p.name,

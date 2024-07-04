@@ -1,7 +1,7 @@
 import { LoveLetterBase } from "./base";
-import { CardsTypes } from "./Cards";
-import { Gameplay } from "./Gameplay";
-import { State } from "./State";
+import { Roles } from "./Managers/CardsUtils";
+import { Gameplay } from "./Managers/Gameplay";
+import { State } from "./Managers/State";
 import { TState } from "./types";
 
 export class LoveLetterEngine extends LoveLetterBase {
@@ -10,7 +10,7 @@ export class LoveLetterEngine extends LoveLetterBase {
   winner: string | null = null;
   round = 0;
 
-  constructor(names: string[], debug: boolean = false, stack: CardsTypes[] = []) {
+  constructor(names: string[], debug: boolean = false, stack: Roles[] = []) {
     super(names);
 
     if (debug) this.stack = stack;
