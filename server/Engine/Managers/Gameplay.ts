@@ -5,7 +5,7 @@ import { Cards } from "./CardsUtils";
 import { SignalsUtils } from "./SignalsUtils";
 
 export namespace Gameplay {
-  export function ProccesActionCard(this: GameEngine, hand: string, params: string[]) {
+  export function ProccesActionCard(this: GameEngine, hand: string, params: string[]): boolean {
     // Check if the card is in the roles
     const role = roles.find((key) => key === hand) as TRole | undefined;
     if (role === undefined) throw new Error(Errors.CARD_NOT_FOUND);
@@ -14,15 +14,17 @@ export namespace Gameplay {
     const signals = player.forUseCard(role, (card) => {
       if (!Cards.canRequirementsBeMet.bind(this)(card)) return [];
 
-      const parsed = Cards.parseUseParams.bind(this)(card, params);
+      const parsed = Cards.parseParams.bind(this)(card, params);
 
       return card.callUse(player, parsed);
     });
 
     SignalsUtils.process.bind(this)(signals);
+
+    return CheckWin.bind(this)();
   }
 
-  export function ProccesSignals(this: GameEngine) {
+  export function ProccesEffectsAndRejected(this: GameEngine): boolean {
     // After the turn is played, the engine should prepare for the next turn.
 
     const allPlayers = this.players.getAll();
@@ -31,6 +33,8 @@ export namespace Gameplay {
       ...allPlayers.flatMap((player) => player.forEffect((card) => card.callEffect(player))),
       ...allPlayers.flatMap((player) => player.forRejected((card) => card.callRejected(player))),
     ]);
+
+    return CheckWin.bind(this)();
   }
 
   export function ProccessOnEnd(this: GameEngine) {

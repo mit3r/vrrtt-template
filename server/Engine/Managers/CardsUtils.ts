@@ -11,7 +11,7 @@ export namespace Cards {
     return requireTargets <= targetablePlayers;
   }
 
-  export function parseUseParams<R extends TRole>(
+  export function parseParams<R extends TRole>(
     this: GameEngine,
     card: Card<R>,
     params: string[]
@@ -28,6 +28,16 @@ export namespace Cards {
       }
     });
 
+    verifyParsed.bind(this)(card, parsed as TRoleToParams<R>);
+
+    return parsed as TRoleToParams<R>;
+  }
+
+  export function verifyParsed<R extends TRole>(
+    this: GameEngine,
+    card: Card<R>,
+    parsed: TRoleToParams<R>
+  ): boolean {
     // Verify levels
     const levels = parsed.filter((p, i) => card.requires[i] === "l") as number[];
     for (const level of levels) {
@@ -50,7 +60,7 @@ export namespace Cards {
       if (!targets.some((t) => t.name === performer.flattery_pointer))
         throw new Error(Errors.FLLATTERY_NOT_TARGETED);
 
-    return parsed as TRoleToParams<R>;
+    return true;
   }
 
   export function get<R extends TRole>(card_id: R): Card<R> {

@@ -40,7 +40,7 @@ export class LoveLetterEngine extends LoveLetterBase {
     Gameplay.ProccesActionCard.bind(this)(hand, params);
 
     // collect effects
-    Gameplay.ProccesSignals.bind(this)();
+    Gameplay.ProccesEffects & Rejected.bind(this)();
 
     // reset protected
 

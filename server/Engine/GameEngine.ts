@@ -1,9 +1,9 @@
+import { TRole } from "./Classes/Card";
+import { TState } from "./Classes/State";
 import { Gameplay } from "./Managers/Gameplay";
 import { PlayersManager } from "./Managers/PlayerManager";
 import { StackManager } from "./Managers/StackManager";
 import { State } from "./Managers/State";
-import { TRole } from "./Classes/Card";
-import { TState } from "./Classes/State";
 import { Errors } from "./utils/Errors";
 
 export class GameEngine {
@@ -33,21 +33,27 @@ export class GameEngine {
   }
 
   playTurn(who: string, hand: TRole, params: string[]) {
+    let state: TState;
+    try {
+      state = this.handle(who, hand, params);
+    } catch (error: any) {
+      throw error;
+    }
+
+    this.emit(state);
+  }
+
+  handle(who: string, hand: TRole, params: string[]): TState {
     // check if it's the player's turn
     if (this.players.current().name !== who) throw new Error(Errors.NOT_PLAYER_TURN);
 
     // play the turn
     let currentPlayer = this.players.current();
-    Gameplay.ProccesActionCard.bind(this)(hand, params);
+    if (Gameplay.ProccesActionCard.bind(this)(hand, params)) return State.get.bind(this)();
 
-    // this.players.resetKnown(currentPlayer);
+    this.players.resetKnown(currentPlayer);
     this.players.resetProtections();
-    Gameplay.ProccesSignals.bind(this)();
-
-    if (Gameplay.CheckWin.bind(this)()) {
-      this.emit(State.get.bind(this)());
-      return;
-    }
+    if (Gameplay.ProccesEffectsAndRejected.bind(this)()) return State.get.bind(this)();
 
     // change player
     this.players.chooseNext();
@@ -57,6 +63,6 @@ export class GameEngine {
     currentPlayer.rejectEffectCard();
 
     // emit current state
-    this.emit(State.get.bind(this)());
+    return State.get.bind(this)();
   }
 }
