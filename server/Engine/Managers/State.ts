@@ -1,5 +1,5 @@
 import { GameEngine } from "../GameEngine";
-import { TOtherPlayer, TPersonalState, TState } from "../types/State";
+import { TOtherPlayer, TPersonalState, TState } from "../Classes/State";
 import { Player } from "./PlayerManager";
 
 export namespace State {
@@ -22,7 +22,6 @@ export namespace State {
       name: p.name,
       alive: p.alive,
       level: p.level,
-      online: p.online,
       effect: p.effect,
       protected: p.protected,
       rejected: p.rejected,

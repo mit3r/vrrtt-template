@@ -2,8 +2,8 @@ import { Gameplay } from "./Managers/Gameplay";
 import { PlayersManager } from "./Managers/PlayerManager";
 import { StackManager } from "./Managers/StackManager";
 import { State } from "./Managers/State";
-import { TRole } from "./types/Cards";
-import { TState } from "./types/State";
+import { TRole } from "./Classes/Card";
+import { TState } from "./Classes/State";
 import { Errors } from "./utils/Errors";
 
 export class GameEngine {
@@ -32,7 +32,7 @@ export class GameEngine {
     if (!debug) this.emit(State.get.bind(this)());
   }
 
-  playTurn(who: string, hand: 0 | 1, params: string[]) {
+  playTurn(who: string, hand: TRole, params: string[]) {
     // check if it's the player's turn
     if (this.players.current().name !== who) throw new Error(Errors.NOT_PLAYER_TURN);
 

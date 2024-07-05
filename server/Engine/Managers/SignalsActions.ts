@@ -1,17 +1,16 @@
-import { LoveLetterEngine } from "..";
 import { GameEngine } from "../GameEngine";
-import { TRole } from "../types/Cards";
-import { SignalType, TSignal } from "../types/Signals";
+import { TRole } from "../Classes/Card";
+import { Signal, TSignal } from "../Classes/Signal";
 import { Errors } from "../utils/Errors";
 
-export const SignalsActions: Record<SignalType, (this: GameEngine, signal: TSignal) => void> = {
-  [SignalType.PROTECT]: function (this, signal) {
+export const SignalsActions: Record<Signal, (this: GameEngine, signal: TSignal) => void> = {
+  [Signal.PROTECT]: function (this, signal) {
     const player = this.players.get(signal.performer);
     if (!player.alive) throw new Error(Errors.PLAYER_MUST_BE_ALIVE);
     player.protected = true;
   },
 
-  [SignalType.SHOW]: function (this, signal) {
+  [Signal.SHOW]: function (this, signal) {
     if (signal.target1 === undefined) throw new Error(Errors.CORUPTED_SIGNAL);
     if (signal.target1 === signal.performer) return;
 
@@ -21,7 +20,7 @@ export const SignalsActions: Record<SignalType, (this: GameEngine, signal: TSign
     performer.known[target.name] = target.hand[0];
   },
 
-  [SignalType.REJECT]: function (this, signal) {
+  [Signal.REJECT]: function (this, signal) {
     if (signal.target1 === undefined) throw new Error(Errors.CORUPTED_SIGNAL);
     // Don't be so strict XD
     // if (signal.target1 === signal.performer) throw new Error(Errors.PLAYER_CANT_USE_THEIR_SELF);
@@ -33,7 +32,7 @@ export const SignalsActions: Record<SignalType, (this: GameEngine, signal: TSign
     target.rejectHandCard(card as TRole);
   },
 
-  [SignalType.KILL]: function (this, signal) {
+  [Signal.KILL]: function (this, signal) {
     if (signal.target1 === undefined) throw new Error(Errors.CORUPTED_SIGNAL);
 
     const performer = this.players.get(signal.performer);
@@ -46,7 +45,7 @@ export const SignalsActions: Record<SignalType, (this: GameEngine, signal: TSign
     // console.log(target.name, target.alive);
   },
 
-  [SignalType.SWAP]: function (this, signal) {
+  [Signal.SWAP]: function (this, signal) {
     if (signal.target1 === undefined) throw new Error(Errors.CORUPTED_SIGNAL);
     if (signal.target2 === undefined) throw new Error(Errors.CORUPTED_SIGNAL);
 
@@ -60,18 +59,18 @@ export const SignalsActions: Record<SignalType, (this: GameEngine, signal: TSign
     player2.hand[0] = hand1;
   },
 
-  [SignalType.POINT]: function (this, signal) {
+  [Signal.POINT]: function (this, signal) {
     const player = this.players.get(signal.performer);
     player.points += 1;
   },
 
-  [SignalType.LEVEL]: function (this, signal) {
+  [Signal.LEVEL]: function (this, signal) {
     const player = this.players.get(signal.performer);
 
     player.level += 1;
   },
 
-  [SignalType.FLATTERY]: function (this, signal) {
+  [Signal.FLATTERY]: function (this, signal) {
     // Flattery has effect only on next turn
     if (signal.target1 === undefined) throw new Error(Errors.CORUPTED_SIGNAL);
 
@@ -79,7 +78,7 @@ export const SignalsActions: Record<SignalType, (this: GameEngine, signal: TSign
     next.flattery_pointer = signal.target1;
   },
 
-  [SignalType.JOKE]: function (this, signal) {
+  [Signal.JOKE]: function (this, signal) {
     // Joke has effect only on the end of the game
     if (signal.target1 === undefined) throw new Error(Errors.CORUPTED_SIGNAL);
     const player = this.players.get(signal.performer);

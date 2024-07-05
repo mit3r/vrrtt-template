@@ -1,4 +1,4 @@
-import { TRole } from "../types/Cards";
+import { TRole } from "../Classes/Card";
 
 export class StackManager {
   stack: TRole[] = [];
@@ -9,8 +9,7 @@ export class StackManager {
     if (shuffle) this.stack.sort(() => Math.random() - 0.5);
   }
 
-  pop = (): TRole | undefined => this.stack.pop();
-
+  pop = (): TRole | undefined => this.stack.shift();
   empty = (): boolean => this.stack.length === 0;
 }
 

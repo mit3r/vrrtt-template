@@ -1,5 +1,6 @@
 import { GameEngine } from "../GameEngine";
-import { SignalType, TSignal } from "../types/Signals";
+import { Card, roles, TRole } from "../Classes/Card";
+import { Signal, TSignal } from "../Classes/Signal";
 import { Errors } from "../utils/Errors";
 import { Cards } from "./CardsUtils";
 import { SignalsActions } from "./SignalsActions";
@@ -19,84 +20,28 @@ export namespace SignalsUtils {
     if (!hasPerformer) return false;
 
     switch (signal.type) {
-      case SignalType.PROTECT:
+      case Signal.PROTECT:
         return true;
-      case SignalType.SHOW:
+      case Signal.SHOW:
         return hasTarget1;
-      case SignalType.REJECT:
+      case Signal.REJECT:
         return hasTarget1;
-      case SignalType.KILL:
+      case Signal.KILL:
         return hasTarget1;
-      case SignalType.SWAP:
+      case Signal.SWAP:
         return hasTarget1 && hasTarget2;
-      case SignalType.POINT:
+      case Signal.POINT:
         return true;
-      case SignalType.LEVEL:
+      case Signal.LEVEL:
         return true;
-      case SignalType.FLATTERY:
+      case Signal.FLATTERY:
         return hasFlattery;
-      case SignalType.JOKE:
+      case Signal.JOKE:
         return hasJoke;
 
       default:
         return false;
     }
-  }
-
-  export function collectUse(this: GameEngine, hand: 0 | 1, params: string[]): TSignal[] {
-    const signals: TSignal[] = [];
-
-    const player = this.players.current();
-
-    player.forUseCard(hand, (card_id) => {
-      const card = Cards.get(card_id);
-
-      const handler = card.handlers.onUse;
-      if (handler === undefined) return;
-
-      const parsed = Cards.parseUseParams.bind(this)(card_id, params);
-
-      signals.push(...handler.bind(this)(player, parsed));
-    });
-
-    return signals;
-  }
-
-  export function collectEffects(this: GameEngine): TSignal[] {
-    const signals: TSignal[] = [];
-
-    for (const performer of this.players.getAll()) {
-      performer.forEffect((card_id) => {
-        if (performer.effect === null) return;
-
-        const card = Cards.get(card_id);
-
-        const handler = card.handlers.onEffect;
-        if (handler === undefined) return;
-
-        signals.push(...handler.bind(this)(performer));
-      });
-    }
-
-    return signals;
-  }
-
-  export function collectRejected(this: GameEngine): TSignal[] {
-    const signals: TSignal[] = [];
-
-    for (const player of this.players.getAll()) {
-      player.forRejected((card_id) => {
-        const card = Cards.get(card_id);
-        if (card === undefined) throw new Error(Errors.CARD_NOT_FOUND);
-
-        const handler = card.handlers.onRejected;
-        if (handler === undefined) return;
-
-        signals.push(...handler.bind(this)(player));
-      });
-    }
-
-    return signals;
   }
 
   export function collectEnd(this: GameEngine): TSignal[] {
@@ -107,7 +52,7 @@ export namespace SignalsUtils {
   export function process(this: GameEngine, signals: TSignal[]): void {
     for (const signal of signals) {
       if (!validateSignal.bind(this)(signal)) throw new Error(Errors.CORUPTED_SIGNAL);
-      SignalsActions[signal.type as SignalType].bind(this)(signal);
+      SignalsActions[signal.type as Signal].bind(this)(signal);
     }
   }
 }

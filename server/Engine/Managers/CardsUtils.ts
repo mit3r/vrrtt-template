@@ -1,16 +1,22 @@
 import { GameEngine } from "../GameEngine";
-import { TCard, TRole, TRoleToParams, TRoleToRequire } from "../types/Cards";
+import { Card, TRole, TRoleToParams } from "../Classes/Card";
 import { Errors } from "../utils/Errors";
-import { cardsList } from "./CardsActions";
+import { cardsMap } from "./CardsActions";
 import { Player } from "./PlayerManager";
 
 export namespace Cards {
+  export function canRequirementsBeMet<R extends TRole>(this: GameEngine, card: Card<R>): boolean {
+    const requireTargets = card.requires.split("").filter((r) => r === "p").length;
+    const targetablePlayers = this.players.getAll().filter((p) => p.alive && !p.protected).length;
+    return requireTargets <= targetablePlayers;
+  }
+
   export function parseUseParams<R extends TRole>(
     this: GameEngine,
-    card_id: R,
+    card: Card<R>,
     params: string[]
   ): TRoleToParams<R> {
-    const card = Cards.get(card_id);
+    // parse params
     if (card.requires.length !== params.length) throw new Error(Errors.CARD_REQUIRES_MORE_PARAMS);
 
     const parsed = params.map((param, i) => {
@@ -29,6 +35,7 @@ export namespace Cards {
       if (level <= 0 || level > 8) throw new Error(Errors.INVALID_LEVEL);
     }
 
+    // Verify targets
     const targets = parsed.filter((p, i) => card.requires[i] === "p") as Player[];
     for (const target of targets) {
       if (!target.alive) throw new Error(Errors.PLAYER_MUST_BE_ALIVE);
@@ -46,15 +53,10 @@ export namespace Cards {
     return parsed as TRoleToParams<R>;
   }
 
-  export function get<R extends TRole>(card_id: R): TCard<R> {
-    const card = cardsList[card_id];
+  export function get<R extends TRole>(card_id: R): Card<R> {
+    const card = cardsMap.get(card_id);
     if (!card) throw new Error(Errors.CARD_NOT_FOUND);
 
-    const [level, requires, handlers] = card as [
-      TCard<TRole>["level"],
-      TRoleToRequire<R>,
-      TCard<TRole>["handlers"]
-    ];
-    return { level, requires, handlers };
+    return card;
   }
 }

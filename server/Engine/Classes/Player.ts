@@ -1,59 +1,7 @@
-import { Card, TRole } from "../Classes/Card";
-import { TSignal } from "../Classes/Signal";
+import { Cards } from "../Managers/CardsUtils";
 import { Errors } from "../utils/Errors";
-import { Cards } from "./CardsUtils";
-
-export class PlayersManager {
-  private list: Player[] = [];
-  private currentPointer: number;
-
-  constructor(names: string[]) {
-    if (names.length < 2 || names.length > 4) throw new Error(Errors.INVALID_PLAYERS_AMOUNT);
-    if (names.length !== new Set(names).size) throw new Error(Errors.PLAYERS_MUST_BE_UNIQUE);
-
-    this.list = names.map((name) => new Player(name));
-    this.currentPointer = 0;
-  }
-
-  get = (name: string) => {
-    const player = this.list.find((p) => p.name === name);
-    if (!player) throw new Error(Errors.PLAYER_NOT_FOUND);
-    return player;
-  };
-
-  getAll = () => this.list;
-  getAlive = () => this.list.filter((p) => p.alive);
-
-  getProtected = () => this.list.filter((p) => p.protected);
-  getUnprotected = () => this.list.filter((p) => !p.protected);
-  resetProtections = () => this.list.forEach((p) => (p.protected = false));
-
-  current = () => this.list[this.currentPointer];
-  chooseNext = () => {
-    if (this.list.length === 0) throw new Error(Errors.NO_PLAYERS);
-
-    while (true) {
-      this.currentPointer = (this.currentPointer + 1) % this.list.length;
-      let player = this.current();
-      if (player.alive) break;
-    }
-  };
-
-  whoIsNext = () => {
-    let pointer = this.currentPointer;
-    while (true) {
-      pointer = (pointer + 1) % this.list.length;
-      let player = this.list[pointer];
-      if (player.alive) return player;
-    }
-  };
-
-  resetKnown = (player: Player) => {
-    for (const p of this.getAll()) {
-      if (p.known[player.name] !== undefined) delete p.known[player.name];
-    }
-  };
-}
+import { Card, TRole } from "./Card";
+import { TSignal } from "./Signal";
 
 export class Player {
   name: string;

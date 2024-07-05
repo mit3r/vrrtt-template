@@ -1,4 +1,4 @@
-export enum SignalType {
+export enum Signal {
   PROTECT = "PROTECT",
   SHOW = "SHOW",
   REJECT = "REJECT",
@@ -11,7 +11,7 @@ export enum SignalType {
 }
 
 export interface TSignal {
-  type: SignalType;
+  type: Signal;
   performer: string;
   target1?: string;
   target2?: string;

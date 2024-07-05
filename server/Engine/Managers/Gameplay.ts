@@ -1,20 +1,35 @@
+import { GameEngine } from "../GameEngine";
+import { roles, TRole } from "../Classes/Card";
+import { Errors } from "../utils/Errors";
 import { Cards } from "./CardsUtils";
 import { SignalsUtils } from "./SignalsUtils";
-import { Errors } from "../utils/Errors";
-import { GameEngine } from "../GameEngine";
-import { Player } from "./PlayerManager";
-import { TSignal } from "../types/Signals";
 
 export namespace Gameplay {
-  export function ProccesActionCard(this: GameEngine, hand: 0 | 1, params: string[]) {
-    SignalsUtils.process.bind(this)(SignalsUtils.collectUse.bind(this)(hand, params));
+  export function ProccesActionCard(this: GameEngine, hand: string, params: string[]) {
+    // Check if the card is in the roles
+    const role = roles.find((key) => key === hand) as TRole | undefined;
+    if (role === undefined) throw new Error(Errors.CARD_NOT_FOUND);
+
+    const player = this.players.current();
+    const signals = player.forUseCard(role, (card) => {
+      if (!Cards.canRequirementsBeMet.bind(this)(card)) return [];
+
+      const parsed = Cards.parseUseParams.bind(this)(card, params);
+
+      return card.callUse(player, parsed);
+    });
+
+    SignalsUtils.process.bind(this)(signals);
   }
 
   export function ProccesSignals(this: GameEngine) {
     // After the turn is played, the engine should prepare for the next turn.
+
+    const allPlayers = this.players.getAll();
+
     SignalsUtils.process.bind(this)([
-      ...SignalsUtils.collectEffects.bind(this)(),
-      ...SignalsUtils.collectRejected.bind(this)(),
+      ...allPlayers.flatMap((player) => player.forEffect((card) => card.callEffect(player))),
+      ...allPlayers.flatMap((player) => player.forRejected((card) => card.callRejected(player))),
     ]);
   }
 
