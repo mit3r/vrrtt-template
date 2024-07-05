@@ -1,5 +1,5 @@
 import { creationTest } from "./creation";
-import { cardsTests } from "./gameplay";
+import { cardsTests } from "./cards";
 
 creationTest();
 cardsTests();

@@ -35,7 +35,7 @@ export type TRoleToRequire<R extends TRole> = R extends "guard"
   : R extends "prince"
   ? "p"
   : R extends "king"
-  ? ""
+  ? "p"
   : R extends "countess"
   ? ""
   : R extends "princess"
@@ -62,11 +62,13 @@ export class Card<R extends TRole> {
   constructor(
     public role: TRole,
     public level: number,
-    public requires: string,
+    public allowYourself: boolean,
+    public requires: TRoleToRequire<R>,
     public handlers: TCardHandlers<R>
   ) {
     this.role = role;
     this.level = level;
+    this.allowYourself = allowYourself;
     this.requires = requires;
     this.handlers = handlers;
   }

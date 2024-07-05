@@ -7,7 +7,7 @@ import { Player } from "./PlayerManager";
 export namespace Cards {
   export function canRequirementsBeMet<R extends TRole>(this: GameEngine, card: Card<R>): boolean {
     const requireTargets = card.requires.split("").filter((r) => r === "p").length;
-    const targetablePlayers = this.players.getAll().filter((p) => p.alive && !p.protected).length;
+    const targetablePlayers = this.players.getTargetable().length - (card.allowYourself ? 0 : 1);
     return requireTargets <= targetablePlayers;
   }
 
@@ -52,6 +52,9 @@ export namespace Cards {
 
       // handmaid protection
       if (target.protected) throw new Error(Errors.PLAYER_IS_PROTECTED);
+
+      if (target.name === this.players.current().name && !card.allowYourself)
+        throw new Error(Errors.PLAYER_CANT_USE_THEIR_SELF);
     }
 
     // flatery targeting

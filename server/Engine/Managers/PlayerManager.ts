@@ -28,6 +28,8 @@ export class PlayersManager {
   getUnprotected = () => this.list.filter((p) => !p.protected);
   resetProtections = () => this.list.forEach((p) => (p.protected = false));
 
+  getTargetable = () => this.list.filter((p) => p.alive && !p.protected);
+
   current = () => this.list[this.currentPointer];
   chooseNext = () => {
     if (this.list.length === 0) throw new Error(Errors.NO_PLAYERS);

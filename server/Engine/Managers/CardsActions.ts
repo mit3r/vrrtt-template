@@ -6,7 +6,7 @@ import { Cards } from "./CardsUtils";
 const GuardOnUse: TUseCallback<"guard"> = function (performer, [target, level]) {
   const target_card = Cards.get(target.hand[0]);
 
-  if (level <= 0 || level > 8) throw Error(Errors.INVALID_LEVEL);
+  if (level < 0 || level > 8) throw Error(Errors.INVALID_LEVEL);
   if (level === 1) throw Error(Errors.GUARD_CANT_GUESS_ANOTHER_GUARD);
 
   // Check if target is assassin
@@ -21,14 +21,10 @@ const GuardOnUse: TUseCallback<"guard"> = function (performer, [target, level]) 
 };
 
 const PriestOnUse: TUseCallback<"priest"> = function (performer, [target]) {
-  if (performer === target) throw Error(Errors.PLAYER_CANT_USE_THEIR_SELF);
-
   return [{ type: Signal.SHOW, performer: performer.name, target1: target.name }];
 };
 
 const BaronOnUse: TUseCallback<"baron"> = function (performer, [target]) {
-  if (performer === target) throw Error(Errors.PLAYER_CANT_USE_THEIR_SELF);
-
   const my_card = Cards.get(performer.hand[0]);
   const target_card = Cards.get(target.hand[0]);
 
@@ -53,12 +49,14 @@ const PrinceOnUse: TUseCallback<"prince"> = function (performer, [target]) {
   return [{ type: Signal.REJECT, performer: performer.name, target1: target.name }];
 };
 
-const KingOnUse: TUseCallback<"king"> = function (performer, []) {
+const KingOnUse: TUseCallback<"king"> = function (performer, [target]) {
   // Countess must be played if the player has a prince or king
   if (performer.hand[0] === "countess")
     return [{ type: Signal.KILL, performer: performer.name, target1: performer.name }];
 
-  return [{ type: Signal.REJECT, performer: performer.name, target1: performer.name }];
+  return [
+    { type: Signal.SWAP, performer: performer.name, target1: performer.name, target2: target.name },
+  ];
 };
 
 const PrincessInRejected: TOtherCallback = function (performer) {
@@ -66,12 +64,12 @@ const PrincessInRejected: TOtherCallback = function (performer) {
 };
 
 export const cardsMap = new Map<TRole, Card<TRole>>([
-  ["guard", new Card("guard", 1, "pl", { onUse: GuardOnUse })],
-  ["priest", new Card("priest", 2, "p", { onUse: PriestOnUse })],
-  ["baron", new Card("baron", 3, "p", { onUse: BaronOnUse })],
-  ["handmaid", new Card("handmaid", 4, "", { onEffect: HandmaidOnEffect })],
-  ["prince", new Card("prince", 5, "p", { onUse: PrinceOnUse })],
-  ["king", new Card("king", 6, "", { onUse: KingOnUse })],
-  ["countess", new Card("countess", 7, "", {})],
-  ["princess", new Card("princess", 8, "", { onRejected: PrincessInRejected })],
+  ["guard", new Card("guard", 1, false, "pl", { onUse: GuardOnUse })],
+  ["priest", new Card("priest", 2, false, "p", { onUse: PriestOnUse })],
+  ["baron", new Card("baron", 3, false, "p", { onUse: BaronOnUse })],
+  ["handmaid", new Card("handmaid", 4, false, "", { onEffect: HandmaidOnEffect })],
+  ["prince", new Card("prince", 5, true, "p", { onUse: PrinceOnUse })],
+  ["king", new Card("king", 6, false, "p", { onUse: KingOnUse })],
+  ["countess", new Card("countess", 7, false, "", {})],
+  ["princess", new Card("princess", 8, false, "", { onRejected: PrincessInRejected })],
 ]);
